@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTML Basics Quiz</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .choice {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .choice:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    #feedback {
+      min-height: 1.5em;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>HTML Basics Quiz</h1>
+    <label for="userName">Your name:</label>
+    <input id="userName" type="text" autocomplete="name" required>
+  <p id="progress"></p>
+  <h2 id="question"></h2>
+  <div id="choices"></div>
+  <p id="feedback" aria-live="polite"></p>
+  <p id="total"></p>
+<button id="emailResults" type="button" hidden>
+  Email my results
+</button>
+  <script>
+    const questions = [
+      {
+        question: "How can you describe HTML code?",
+        choices: [
+          "A programming language",
+          "A markup language",
+          "A database",
+          "An image format"
+        ],
+        answer: 1,
+        explanation: "HTML is a markup language used to structure content on web pages."
+      },
+      {
+        question: "What are HTML code elements called?",
+        choices: ["Tags", "Variables", "Functions", "Commands"],
+        answer: 0,
+        explanation: "HTML elements are written using tags, such as <p> and </p>."
+      },
+      {
+        question: "What is the best way to describe how HTML elements work together?",
+        choices: [
+          "Like rows in a spreadsheet",
+          "Like nesting dolls",
+          "Like separate files",
+          "Like steps in a timer"
+        ],
+        answer: 1,
+        explanation: "HTML elements can be placed inside other elements, like nesting dolls."
+      },
+      {
+        question: "What are the main elements of a basic HTML page?",
+        choices: [
+          "HTML, HEAD, BODY",
+          "TITLE, STYLE, FOOTER",
+          "HTML, MAIN, SCRIPT",
+          "HEAD, NAV, SECTION"
+        ],
+        answer: 0,
+        explanation: "A basic page has an HTML root element, with HEAD and BODY sections inside it."
+      },
+      {
+        question: "Which option shows the correct basic structure for the main elements?",
+        choices: [
+          "<HEAD><HTML></HTML><BODY></BODY></HEAD>",
+          "<HTML><BODY></BODY><HEAD></HEAD></HTML>",
+          "<HTML><HEAD></HEAD><BODY></BODY></HTML>",
+          "<BODY><HTML><HEAD></HEAD></HTML></BODY>"
+        ],
+        answer: 2,
+        explanation: "The HEAD and BODY elements are both inside the HTML element, with their own opening and closing tags."
+      },
+      {
+        question: "Which area of the code contains the parts that the viewer will see?",
+        choices: [
+          "<HEAD></HEAD>",
+          "<BODY></BODY>",
+          "<HTML></HTML>",
+          "<STYLE></STYLE>"
+        ],
+        answer: 1,
+        explanation: "Visible page content, such as text and images, is generally placed inside the BODY element."
+      },
+      {
+        question: "Where in the code can you put rules that determine how the page looks?",
+        choices: [
+          "<BODY></BODY>",
+          "<TITLE></TITLE>",
+          "<STYLE></STYLE>",
+          "<HTML></HTML>"
+        ],
+        answer: 2,
+        explanation: "CSS rules can be placed inside a STYLE element, usually in the HEAD."
+      },
+      {
+        question: "What is a class in HTML?",
+        choices: [
+          "A way to identify and group elements in the page",
+          "A special kind of image",
+          "The name of the page's browser window",
+          "A tag that closes the HTML document"
+        ],
+        answer: 0,
+        explanation: "A class name identifies or groups elements so CSS or JavaScript can select them."
+      },
+      {
+        question: "What is a computer science name for a class?",
+        choices: [
+          "A selector",
+          "An object",
+          "A tag",
+          "A stylesheet"
+        ],
+        answer: 1,
+        explanation: "In object-oriented programming, a class is a blueprint for creating objects. In HTML, the word “class” has a different meaning: it is an attribute used to identify or group elements."
+      },
+      {
+        question: "Which file-name extension is commonly used for an HTML web page?",
+        choices: [".PDF", ".DOC", ".HTML", ".PNG"],
+        answer: 2,
+        explanation: "The .html extension identifies a file as an HTML document that browsers can display as a web page."
+      }
+    ];
+
+    let currentQuestion = 0;
+    let totalTries = 0;
+
+    const progress = document.getElementById("progress");
+    const questionHeading = document.getElementById("question");
+    const choicesContainer = document.getElementById("choices");
+    const feedback = document.getElementById("feedback");
+    const total = document.getElementById("total");
+    
+    const emailResultsButton = document.getElementById("emailResults");
+
+    emailResultsButton.addEventListener("click", () => {
+        const name = document.getElementById("userName").value.trim();
+
+        if (!name) {
+            alert("Please enter your name first.");
+            document.getElementById("userName").focus();
+            return;
+        }
+
+        const subject = encodeURIComponent("HTML Basics Quiz Results");
+        const body = encodeURIComponent(
+            `Name: ${name}\nTotal tries: ${totalTries}`
+        );
+
+        window.location.href =
+        `mailto:jpratt@forestville.com?subject=${subject}&body=${body}`;
+    });
+
+    function showQuestion() {
+      const item = questions[currentQuestion];
+
+      progress.textContent =
+        `Question ${currentQuestion + 1} of ${questions.length}`;
+      questionHeading.textContent = item.question;
+      feedback.textContent = "";
+      total.textContent = `Total tries so far: ${totalTries}`;
+      choicesContainer.replaceChildren();
+
+      item.choices.forEach((choice, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice";
+        button.textContent = choice;
+        button.addEventListener("click", () => checkAnswer(index, button));
+        choicesContainer.appendChild(button);
+      });
+    }
+
+    function checkAnswer(selectedIndex, selectedButton) {
+      totalTries++;
+
+      const item = questions[currentQuestion];
+
+      if (selectedIndex === item.answer) {
+        feedback.textContent = `Correct! ${item.explanation}`;
+        choicesContainer.querySelectorAll("button").forEach(button => {
+          button.disabled = true;
+        });
+
+        if (currentQuestion === questions.length - 1) {
+          progress.textContent = "Quiz complete!";
+          questionHeading.textContent = "Well done!";
+          total.textContent =
+            `You answered all 10 questions correctly in ${totalTries} tries.`;
+          emailResultsButton.hidden = false;  
+        } else {
+          const nextButton = document.createElement("button");
+          nextButton.type = "button";
+          nextButton.textContent = "Next question";
+          nextButton.addEventListener("click", () => {
+            currentQuestion++;
+            showQuestion();
+          });
+          choicesContainer.appendChild(nextButton);
+        }
+      } else {
+        selectedButton.disabled = true;
+        feedback.textContent =
+          "Incorrect. That choice is no longer available. Try another.";
+        total.textContent = `Total tries so far: ${totalTries}`;
+      }
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>
